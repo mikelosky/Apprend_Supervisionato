@@ -1,9 +1,6 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from sklearn import metrics
 
 
 class R_L_M:
@@ -30,16 +27,15 @@ class R_L_M:
         y_pred = regressor.predict(self.xtest)
         self.df = pd.DataFrame({'Actual': np.array(self.ytest).flatten(), 'Predicted': np.array(y_pred).flatten()})
 
-
-        wine_norm=self.normalization(self.xtrain,"zscore")
-        self.wine_test = self.normalization(self.xtest,"zscore")
-        theta,theta_history,cost_history=self.m_l_r(wine_norm,self.ytrain)
+        wine_norm = self.normalization(self.xtrain, "zscore")
+        self.wine_test = self.normalization(self.xtest, "zscore")
+        theta, theta_history, cost_history = self.m_l_r(wine_norm, self.ytrain)
         self.test(thetask)
-        self.testtest(theta,self.wine_test,self.ytest)
-        #self.new_feature(wine_x,wine_y)
+        self.testtest(theta, self.wine_test, self.ytest)
+        # self.new_feature(wine_x,wine_y)
 
-    def elimination(self,wine):
-        #verificare che non vi siano valori nulli o ripetuti del dataset
+    def elimination(self, wine):
+        # verificare che non vi siano valori nulli o ripetuti del dataset
 
         wine_1 = wine.drop_duplicates()
 
@@ -47,66 +43,66 @@ class R_L_M:
 
         return (wine_2)
 
-    def normalization(self,wine,type):
-        #applicachiamo la normalizzazione z-score che equivale a (x-medi)/std o la minmax
+    def normalization(self, wine, type):
+        # applicachiamo la normalizzazione z-score che equivale a (x-medi)/std o la minmax
         if type == "zscore":
-            wine_n = (wine - wine.mean())/wine.std()
+            wine_n = (wine - wine.mean()) / wine.std()
         else:
-            wine_n = (wine - wine.min())/(wine.max()-wine.min())
+            wine_n = (wine - wine.min()) / (wine.max() - wine.min())
         return wine_n
 
-    def m_l_r(self,wine,y):
-        n_iter=10000
-        alpha=0.02
+    def m_l_r(self, wine, y):
+        n_iter = 10000
+        alpha = 0.02
 
-        x_1=np.append(np.ones((len(wine),1)),wine,axis=1)
-        x_len= len(x_1[0])
+        x_1 = np.append(np.ones((len(wine), 1)), wine, axis=1)
+        x_len = len(x_1[0])
         x_1 = np.matrix(x_1)
 
         theta = np.matrix(np.random.randn(x_len, 1))
         cost_history = np.zeros(n_iter)
         theta_history = []
         y = np.matrix(y)
-        for i in range(0,n_iter):
-            error=np.dot(x_1,theta)-y
-            delta=np.dot(x_1.T,error)/len(y)
-            theta=(theta-(alpha*delta))
+        for i in range(0, n_iter):
+            error = np.dot(x_1, theta) - y
+            delta = np.dot(x_1.T, error) / len(y)
+            theta = (theta - (alpha * delta))
             theta_history.append(theta)
-            #cost_history[i]=self.cost_function(x_1,y,theta)
+            #cost_history[i] = self.cost_function(x_1, y, theta)
 
-        return theta,theta_history,cost_history
+        return theta, theta_history, cost_history
 
-    def cost_function(self,x,y,theta):
-        cost=((np.sum(np.matmul(x,theta.T)-pd.DataFrame.as_matrix(y).T))**2)/(2*len(y))
+    def cost_function(self, x, y, theta):
+        cost = (np.sum(np.square(np.dot(x, theta) - y.T))) / (2 * len(y))
         return cost
 
-    def test(self,theta):
-        array_test=[ 6.0, 0.31, 0.47, 3.6, 0.067, 18.0, 42.0, 0.99549, 3.39, 0.66, 11.0]
-        array_test= self.normalization(np.array(array_test),"zscore")
-        prediction=np.dot(theta,array_test)
-        print("Predizione con l`array di test: "+ str(prediction))
+    def test(self, theta):
+        array_test = [6.0, 0.31, 0.47, 3.6, 0.067, 18.0, 42.0, 0.99549, 3.39, 0.66, 11.0]
+        array_test = self.normalization(np.array(array_test), "zscore")
+        prediction = np.dot(theta, array_test)
+        print("Predizione con l`array di test: " + str(prediction))
 
-    def test2(self,theta):
-        array_test=[1,6.0, 0.31, 0.47, 3.6, 0.067, 18.0, 42.0, 0.99549, 3.39, 0.66, 11.0, 2.7]
-        prediction=np.dot(array_test,theta)
-        print("Predizione con l`array di test2: "+ str(prediction))
+    def test2(self, theta):
+        array_test = [1, 6.0, 0.31, 0.47, 3.6, 0.067, 18.0, 42.0, 0.99549, 3.39, 0.66, 11.0, 2.7]
+        prediction = np.dot(array_test, theta)
+        print("Predizione con l`array di test2: " + str(prediction))
 
-    def new_feature(self,wine_x,wine_y):
-        #adding a new feature in the dataset
-        new_feature=np.array(wine_x[["fixed acidity"]])*np.array(wine_x[["pH"]])
-        wine_new=np.append(wine_x,new_feature,axis=1)
-        wine_norm = self.normalization(wine_new,"minmax")
-        prova=len(wine_norm[0])
+    def new_feature(self, wine_x, wine_y):
+        # adding a new feature in the dataset
+        new_feature = np.array(wine_x[["fixed acidity"]]) * np.array(wine_x[["pH"]])
+        wine_new = np.append(wine_x, new_feature, axis=1)
+        wine_norm = self.normalization(wine_new, "minmax")
+        prova = len(wine_norm[0])
         theta, theta_history, cost_history = self.m_l_r(wine_norm, wine_y)
         self.test2(theta)
 
-    def testtest(self,theta, xnp, ynp):
+    def testtest(self, theta, xnp, ynp):
         diffsom = 0
         mones = np.ones((len(xnp), 1))
         x_1 = np.append(mones, xnp, axis=1)
         xnp = np.matrix(xnp)
         ynp = np.matrix(ynp)
-        y_pre = np.dot(x_1,theta)
+        y_pre = np.dot(x_1, theta)
         self.dfmio = pd.DataFrame({'Actual': np.array(ynp).flatten(), 'Predicted': np.array(y_pre).flatten()})
         for i in range(0, len(xnp)):
             test1 = xnp[i]
@@ -124,28 +120,28 @@ class R_L_M:
         print("Mean absolute error  : " + str(self.MAE(theta, x_1, ynp)))
         print("Coefficiente di determinazione : " + str(self.R2(theta, x_1, ynp)))
 
-    def RMSE(self,theta, X, y):
+    def RMSE(self, theta, X, y):
         yp = np.dot(X, theta)
         loss = np.power((yp - y), 2)
         loss = np.sum(loss)
         rmse = (loss / len(y)) ** (0.5)
         return rmse
 
-    def MSE(self,theta, X, y):
+    def MSE(self, theta, X, y):
         yp = np.dot(X, theta)
         loss = np.power((yp - y), 2)
         loss = np.sum(loss)
         mse = loss / len(y)
         return mse
 
-    def MAE(self,theta, X, y):
+    def MAE(self, theta, X, y):
         yp = np.dot(X, theta)
         loss = (yp - y)
         loss = np.sum(loss)
         mae = loss / len(y)
         return mae
 
-    def R2(self,theta, X, y):
+    def R2(self, theta, X, y):
         yp = np.dot(X, theta)
         yavg = np.mean(y)
         ess = np.sum(np.power((yp - yavg), 2))
